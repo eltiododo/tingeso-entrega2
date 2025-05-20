@@ -1,0 +1,27 @@
+server:
+  port: 8080
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: '*'
+            allowedMethods: "*"
+            allowedHeaders: "*"
+      routes:
+        - id: kartingrm
+          uri: lb://kartingrm:8090
+          predicates:
+            - Path=/api/mono/**
