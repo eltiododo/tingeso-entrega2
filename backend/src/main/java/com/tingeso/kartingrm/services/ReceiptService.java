@@ -7,6 +7,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.tingeso.kartingrm.dtos.ClientDTO;
 import com.tingeso.kartingrm.dtos.ClientReceiptRow;
+import com.tingeso.kartingrm.dtos.ReservationCategory;
 import com.tingeso.kartingrm.entities.ClientEntity;
 import com.tingeso.kartingrm.entities.ReceiptEntity;
 import com.tingeso.kartingrm.entities.ReservationEntity;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.web.client.RestTemplate;
 
 
 @Service
@@ -44,6 +46,8 @@ public class ReceiptService {
     private JavaMailSender mailSender;
     @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private RestTemplate restTemplate;
 
     // holidays: año nuevo, dia del trabajador, fiestas patrias, navidad
     List<Integer> holidays = Stream.of("01-01", "05-01", "09-18", "09-19", "12-25")
@@ -64,6 +68,13 @@ public class ReceiptService {
         ReservationEntity reservation = reservationRepository.findById(idReservation)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada con ID: " + idReservation));
 
+        // get category
+        ReservationCategory category = restTemplate.getForObject(
+                "http://ms1-reservation-categories/api/reservation-category/get/"
+                        + reservation.getCategory(), ReservationCategory.class);
+        assert (category != null);
+
+        // get clients
         List<ClientDTO> clients = reservation.getIdClients().stream()
                 .map(c -> clientRepository.findById(c)
                         .orElseThrow(() -> new RuntimeException("Cliente no encontrado con ID: " + c)))
@@ -72,7 +83,7 @@ public class ReceiptService {
 
         int clientAmount = clients.size();
         List<ClientReceiptRow> crows = clients.stream()
-                .map(c -> generateClientReceiptRow(c, clientAmount, c.getVisits(), reservation))
+                .map(c -> generateClientReceiptRow(c, clientAmount, c.getVisits(), reservation, category))
                 .toList();
 
         int tariff = crows.stream()
@@ -104,10 +115,10 @@ public class ReceiptService {
     }
 
     public ClientReceiptRow generateClientReceiptRow(ClientDTO client, Integer clientAmount,
-                                                     Integer clientMonthlyVisits, ReservationEntity reservation) {
+                                                     Integer clientMonthlyVisits, ReservationEntity reservation, ReservationCategory category) {
         ClientReceiptRow crow = new ClientReceiptRow();
         crow.setClientName(client.getFirstName() + " " + client.getLastName());
-        crow.setBaseTariff(reservation.getCategory().getCost());
+        crow.setBaseTariff(category.getCost());
         crow.setGroupDiscount(DiscountType.getDiscount(clientAmount));
 
         if (client.getBirthday() != null && reservation.getBookingDate().getDayOfYear() == client.getBirthday())
@@ -135,6 +146,11 @@ public class ReceiptService {
             ReservationEntity reservation = reservationRepository.findById(idReservation)
                     .orElseThrow(() -> new RuntimeException("Reserva no encontrada con id " + idReservation));
 
+            // get category
+            ReservationCategory category = restTemplate.getForObject(
+                    "http://ms1-reservation-categories/api/reservation-category/get/"
+                            + reservation.getCategory(), ReservationCategory.class);
+
             ClientEntity reservee = clientRepository.findById(reservation.getReserveeClientId())
                     .orElseThrow(() -> new RuntimeException("Cliente "));
 
@@ -145,7 +161,7 @@ public class ReceiptService {
                     .map(this::clientToDto)
                     .toList();
             List<ClientReceiptRow> crows = clients.stream()
-                    .map(c -> generateClientReceiptRow(c, clients.size(), c.getVisits(), reservation))
+                    .map(c -> generateClientReceiptRow(c, clients.size(), c.getVisits(), reservation, category))
                     .toList();
 
             // titulo
@@ -240,11 +256,11 @@ public class ReceiptService {
         }
     }
 
-    int getTariff(int clientAmount, ReservationEntity reservation) {
+    int getTariff(int clientAmount, ReservationEntity reservation, ReservationCategory category) {
         DiscountType discount = DiscountType.getDiscount(clientAmount);
 
         // Tarifa especial por dias
-        int tariff = reservation.getCategory().getCost();
+        int tariff = category.getCost();
         LocalDate reservationDay = reservation.getBookingDate().toLocalDate();
 
         // si es fin de semana, o dia feriado...
@@ -300,7 +316,7 @@ public class ReceiptService {
             String personalizedBody = "Hola " + client.getFirstName() + ",\n\n"
                     + String.format(baseBody,
                     reservation.getBookingDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                    reservation.getCategory().name(),
+                    reservation.getCategory(),
                     clients.size());
 
             sendReceiptEmail(

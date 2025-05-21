@@ -7,7 +7,10 @@ import com.tingeso.kartingrm.entities.ReservationEntity;
 import com.tingeso.kartingrm.dtos.ReservationCategory;
 import com.tingeso.kartingrm.repositories.ClientRepository;
 import com.tingeso.kartingrm.repositories.ReservationRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReservationService {
@@ -30,12 +34,15 @@ public class ReservationService {
 
     public ReservationEntity createReservation(LocalDateTime bookingDate, String reservationCategory, List<ClientEntity> clients) {
         // obtener categoria desde ms1
-        List<ReservationCategory> resCategories = restTemplate.getForObject("http://localhost:8091/api/reservation-category/get", List.class);
+        Map<String, ReservationCategory> resCategories = restTemplate.exchange(
+                "http://ms1-reservation-categories/api/reservation-category/get",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, ReservationCategory>>(){}
+        ).getBody();
         assert resCategories != null;
-        ReservationCategory resCategory = resCategories.stream()
-                .filter(cg -> cg.getCategory().equals(reservationCategory))
-                .findFirst().orElse(null);
-        if (resCategory == null) {
+        ReservationCategory category = resCategories.get(reservationCategory);
+        if (category == null) {
             throw new RuntimeException("No existe la categoria " + reservationCategory);
         }
 
@@ -58,11 +65,12 @@ public class ReservationService {
         if (bookingTime.isBefore(openTime) || bookingTime.isAfter(closeTime))
             throw new RuntimeException("Hora de reserva invalida");
 
+        // quizas esto del overlap deberia ir en ms-rack, nose que otra logica pondria ahi
         // comprovar overlap de reservas antes
         List<ReservationEntity> reservationsAfter = reservationRepository
                 .findByBookingDateBetween(LocalDateTime.of(bookingDayMonthYear, bookingTime),
                         LocalDateTime.of(bookingDayMonthYear,
-                                bookingTime.plusMinutes(resCategory.getMinutesTotal() - 1)));
+                                bookingTime.plusMinutes(category.getMinutesTotal() - 1)));
 
         if (!reservationsAfter.isEmpty()) {
             throw new RuntimeException("Solapamiento de reservas (posterior)");
@@ -72,13 +80,11 @@ public class ReservationService {
         List<ReservationEntity> reservationsBefore = reservationRepository
                 .findByBookingDateBetween(
                        LocalDateTime.of(bookingDayMonthYear,
-                               bookingTime.minusMinutes(resCategories.getLast().getMinutesTotal())),
+                               bookingTime.minusMinutes(resCategories.get("TIER3").getMinutesTotal())),
                        LocalDateTime.of(bookingDayMonthYear, bookingTime))
                 .stream()
                 .filter(r -> {
-                    String cat = r.getCategory();
-                    int mins = resCategories.stream().filter(cg -> cg.getCategory().equals(cat))
-                            .findFirst().get().getMinutesTotal();
+                    int mins = resCategories.get(r.getCategory()).getMinutesTotal();
                     return r.getBookingDate().toLocalTime().plusMinutes(mins).isAfter(bookingTime);
                 })
                 .toList();

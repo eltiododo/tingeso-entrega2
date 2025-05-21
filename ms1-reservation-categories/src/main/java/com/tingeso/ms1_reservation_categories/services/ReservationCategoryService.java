@@ -5,16 +5,19 @@ import com.tingeso.ms1_reservation_categories.enums.ReservationCategory;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @Service
 public class ReservationCategoryService {
     public ReservationCategoryService() {}
 
-    public List<ReservationCategoryDTO> getAll() {
-        return Arrays.stream(ReservationCategory.values())
-                .map(this::toDto)
-                .toList();
+    public Map<String, ReservationCategoryDTO> getAll() {
+        Map<String, ReservationCategoryDTO> categories = new HashMap<>();
+        Arrays.stream(ReservationCategory.values())
+                .forEach(category ->
+                        categories.put(category.name(), toDto(category)));
+        return categories;
     }
 
     public ReservationCategoryDTO getByTierName(String tierName) {
@@ -28,7 +31,6 @@ public class ReservationCategoryService {
 
     public ReservationCategoryDTO toDto(ReservationCategory reservationCategory) {
         return new ReservationCategoryDTO(
-                reservationCategory.name(),
                 reservationCategory.getLaps(),
                 reservationCategory.getMinutesMax(),
                 reservationCategory.getCost(),

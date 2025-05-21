@@ -1,14 +1,13 @@
 package com.tingeso.ms1_reservation_categories.controllers;
 
 import com.tingeso.ms1_reservation_categories.dtos.ReservationCategoryDTO;
-import com.tingeso.ms1_reservation_categories.enums.ReservationCategory;
 import com.tingeso.ms1_reservation_categories.services.ReservationCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reservation-category")
@@ -21,7 +20,7 @@ public class ReservationCategoryController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<List<ReservationCategoryDTO>> getAll() {
+    public ResponseEntity<Map<String, ReservationCategoryDTO>> getAll() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationCategoryService.getAll());

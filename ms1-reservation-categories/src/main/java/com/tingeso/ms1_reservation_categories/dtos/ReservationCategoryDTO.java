@@ -8,7 +8,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReservationCategoryDTO {
-    private final String category;
     private final int laps;
     private final int minutesMax;
     private final int cost;
