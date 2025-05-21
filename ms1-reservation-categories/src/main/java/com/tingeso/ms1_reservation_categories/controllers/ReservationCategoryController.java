@@ -20,7 +20,7 @@ public class ReservationCategoryController {
         this.reservationCategoryService = reservationCategoryService;
     }
 
-    @GetMapping
+    @GetMapping("/get")
     public ResponseEntity<List<ReservationCategoryDTO>> getAll() {
         return ResponseEntity
                 .status(HttpStatus.OK)

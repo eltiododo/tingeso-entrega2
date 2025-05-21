@@ -25,3 +25,7 @@ spring:
           uri: lb://kartingrm:8090
           predicates:
             - Path=/api/mono/**
+        - id: ms1-reservation-categories
+          uri: lb://ms1-reservation-categories:8091
+          predicates:
+            - Path=/api/reservation-category/**

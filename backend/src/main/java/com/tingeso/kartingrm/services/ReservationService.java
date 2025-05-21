@@ -30,7 +30,7 @@ public class ReservationService {
 
     public ReservationEntity createReservation(LocalDateTime bookingDate, String reservationCategory, List<ClientEntity> clients) {
         // obtener categoria desde ms1
-        List<ReservationCategory> resCategories = restTemplate.getForObject("http://localhost:8081/api/reservation-category", List.class);
+        List<ReservationCategory> resCategories = restTemplate.getForObject("http://localhost:8091/api/reservation-category/get", List.class);
         assert resCategories != null;
         ReservationCategory resCategory = resCategories.stream()
                 .filter(cg -> cg.getCategory().equals(reservationCategory))
