@@ -1,6 +1,6 @@
 package com.tingeso.kartingrm.entities;
 
-import com.tingeso.kartingrm.enums.ReservationCategory;
+import com.tingeso.kartingrm.dtos.ReservationCategory;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,8 +21,7 @@ public class ReservationEntity {
     LocalDateTime bookingDate;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    ReservationCategory category;
+    String category;
 
     @Column(nullable = false)
     @ElementCollection

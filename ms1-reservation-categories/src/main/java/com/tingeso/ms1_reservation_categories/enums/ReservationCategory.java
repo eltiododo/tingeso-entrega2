@@ -1,4 +1,4 @@
-package com.tingeso.kartingrm.enums;
+package com.tingeso.ms1_reservation_categories.enums;
 
 import lombok.Getter;
 

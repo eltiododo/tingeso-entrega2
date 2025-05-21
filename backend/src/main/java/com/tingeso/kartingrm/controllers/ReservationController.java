@@ -2,7 +2,6 @@ package com.tingeso.kartingrm.controllers;
 
 import com.tingeso.kartingrm.dtos.ReservationDTO;
 import com.tingeso.kartingrm.entities.ReservationEntity;
-import com.tingeso.kartingrm.enums.ReservationCategory;
 import com.tingeso.kartingrm.services.ReservationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +38,10 @@ public class ReservationController {
         return reservationService.getAllReservations();
     }
 
-    @GetMapping("/getCategory")
-    public List<ReservationEntity> getAllReservationsByCategory(@RequestParam String category) {
-        return reservationService.getReservationsByCategory(ReservationCategory.valueOf(category));
-    }
+//    @GetMapping("/getCategory")
+//    public List<ReservationEntity> getAllReservationsByCategory(@RequestParam String category) {
+//        return reservationService.getReservationsByCategory(category);
+//    }
 
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteReservation(@RequestParam Long id) {

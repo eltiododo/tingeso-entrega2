@@ -4,32 +4,44 @@ import com.tingeso.kartingrm.dtos.CreateReservationClientDTO;
 import com.tingeso.kartingrm.dtos.ReservationDTO;
 import com.tingeso.kartingrm.entities.ClientEntity;
 import com.tingeso.kartingrm.entities.ReservationEntity;
-import com.tingeso.kartingrm.enums.ReservationCategory;
+import com.tingeso.kartingrm.dtos.ReservationCategory;
 import com.tingeso.kartingrm.repositories.ClientRepository;
 import com.tingeso.kartingrm.repositories.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-import java.sql.Date;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 public class ReservationService {
     @Autowired
     ReservationRepository reservationRepository;
+
     @Autowired
     ClientRepository clientRepository;
 
+    @Autowired
+    RestTemplate restTemplate;
+
     public ReservationEntity createReservation(LocalDateTime bookingDate, String reservationCategory, List<ClientEntity> clients) {
+        // obtener categoria desde ms1
+        List<ReservationCategory> resCategories = restTemplate.getForObject("http://localhost:8081/api/reservation-category", List.class);
+        assert resCategories != null;
+        ReservationCategory resCategory = resCategories.stream()
+                .filter(cg -> cg.getCategory().equals(reservationCategory))
+                .findFirst().orElse(null);
+        if (resCategory == null) {
+            throw new RuntimeException("No existe la categoria " + reservationCategory);
+        }
+
         ReservationEntity reservationEntity = new ReservationEntity();
-        ReservationCategory resCategory = ReservationCategory.valueOf(reservationCategory);
         reservationEntity.setBookingDate(bookingDate);
-        reservationEntity.setCategory(resCategory);
+        reservationEntity.setCategory(reservationCategory);
 
         LocalDate bookingDayMonthYear = bookingDate.toLocalDate();
         DayOfWeek bookingDay = bookingDayMonthYear.getDayOfWeek();
@@ -60,11 +72,15 @@ public class ReservationService {
         List<ReservationEntity> reservationsBefore = reservationRepository
                 .findByBookingDateBetween(
                        LocalDateTime.of(bookingDayMonthYear,
-                               bookingTime.minusMinutes(ReservationCategory.TIER3.getMinutesTotal())),
+                               bookingTime.minusMinutes(resCategories.getLast().getMinutesTotal())),
                        LocalDateTime.of(bookingDayMonthYear, bookingTime))
                 .stream()
-                .filter(r -> r.getBookingDate().toLocalTime().plusMinutes(
-                                r.getCategory().getMinutesTotal()).isAfter(bookingTime))
+                .filter(r -> {
+                    String cat = r.getCategory();
+                    int mins = resCategories.stream().filter(cg -> cg.getCategory().equals(cat))
+                            .findFirst().get().getMinutesTotal();
+                    return r.getBookingDate().toLocalTime().plusMinutes(mins).isAfter(bookingTime);
+                })
                 .toList();
 
         if (!reservationsBefore.isEmpty()) {
@@ -103,9 +119,9 @@ public class ReservationService {
         return toDto(reservationRepository.findById(id).orElse(null));
     }
 
-    public List<ReservationEntity> getReservationsByCategory(ReservationCategory reservationCategory) {
-        return reservationRepository.findByCategory(reservationCategory);
-    }
+//    public List<ReservationEntity> getReservationsByCategory(ReservationCategory reservationCategory) {
+//        return reservationRepository.findByCategory(reservationCategory);
+//    }
 
     public void deleteReservation(Long id) {
         ReservationEntity reservation = reservationRepository.findById(id).orElse(null);
@@ -121,7 +137,7 @@ public class ReservationService {
         if (r == null) return null;
         ReservationDTO rdto = new ReservationDTO();
         rdto.setId(r.getId());
-        rdto.setCategory(r.getCategory().name());
+        rdto.setCategory(r.getCategory());
         rdto.setBookingDate(r.getBookingDate());
         rdto.setClients(r.getIdClients().stream().map(cId -> clientRepository.findById(cId).orElse(null)).toList());
         return rdto;
