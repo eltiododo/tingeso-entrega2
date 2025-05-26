@@ -29,3 +29,7 @@ spring:
           uri: lb://ms1-reservation-categories:8091
           predicates:
             - Path=/api/reservation-category/**
+        - id: ms2-quantity-discounts
+          uri: lb://ms2-quantity-discounts:8092
+          predicates:
+            - Path=/api/quantity-discount/**

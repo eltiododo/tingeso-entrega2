@@ -9,7 +9,7 @@ import lombok.Getter;
 public class ClientReceiptRow {
     String clientName;
     Integer baseTariff;
-    DiscountType groupDiscount;
+    QuantityDiscount groupDiscount;
     DiscountType individualDiscount;
     Integer finalCost;
 }

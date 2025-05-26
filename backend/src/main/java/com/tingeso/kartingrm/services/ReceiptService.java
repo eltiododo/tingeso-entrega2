@@ -7,6 +7,7 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.tingeso.kartingrm.dtos.ClientDTO;
 import com.tingeso.kartingrm.dtos.ClientReceiptRow;
+import com.tingeso.kartingrm.dtos.QuantityDiscount;
 import com.tingeso.kartingrm.dtos.ReservationCategory;
 import com.tingeso.kartingrm.entities.ClientEntity;
 import com.tingeso.kartingrm.entities.ReceiptEntity;
@@ -83,7 +84,8 @@ public class ReceiptService {
 
         int clientAmount = clients.size();
         List<ClientReceiptRow> crows = clients.stream()
-                .map(c -> generateClientReceiptRow(c, clientAmount, c.getVisits(), reservation, category))
+                .map(c -> generateClientReceiptRow(c,
+                        clientAmount, c.getVisits(), reservation, category))
                 .toList();
 
         int tariff = crows.stream()
@@ -119,13 +121,17 @@ public class ReceiptService {
         ClientReceiptRow crow = new ClientReceiptRow();
         crow.setClientName(client.getFirstName() + " " + client.getLastName());
         crow.setBaseTariff(category.getCost());
-        crow.setGroupDiscount(DiscountType.getDiscount(clientAmount));
+
+        // get quantity discount
+        QuantityDiscount quantityDiscount = restTemplate.getForObject(
+                "http://ms2-quantity-discounts/api/quantity-discount/"
+                        + clientAmount, QuantityDiscount.class);
+        crow.setGroupDiscount(quantityDiscount);
 
         if (client.getBirthday() != null && reservation.getBookingDate().getDayOfYear() == client.getBirthday())
             crow.setIndividualDiscount(DiscountType.BIRTHDAY);
         else
             crow.setIndividualDiscount(DiscountType.getFrequencyDiscount(clientMonthlyVisits));
-
         crow.setFinalCost((int) (crow.getBaseTariff()
                         * (1 - (double) (crow.getGroupDiscount().getPercentage()) / 100)
                         * (1 - (double) (crow.getIndividualDiscount().getPercentage()) / 100)));
