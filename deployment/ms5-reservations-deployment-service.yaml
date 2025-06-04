@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms5-reservations
+  labels:
+    app: ms5-reservations
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms5-reservations
+  template:
+    metadata:
+      labels:
+        app: ms5-reservations
+    spec:
+      containers:
+        - name: ms5-reservations
+          image: tingeso2clusterregistry.azurecr.io/ms5-reservations:latest
+          ports:
+            - containerPort: 8095
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "config-server-service"
+            - name: EUREKA_SERVER_HOST
+              value: "eureka-server-service"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_HOST
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_NAME_MS5
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: project-secrets
+                  key: DB_PASS
+            - name: EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: project-secrets
+                  key: EMAIL
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: project-secrets
+                  key: EMAIL_PASS

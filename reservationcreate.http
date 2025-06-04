@@ -1,0 +1,15 @@
+POST http://localhost:8080/api/mono/reservation/create
+Content-Type: application/json
+
+{
+  "id": 999,
+  "bookingDate": "2025-05-21T14:30:00",
+  "category": "TIER1",
+  "clients": [{
+    "id": 3,
+    "firstName": "Ana",
+    "lastName": "Martínez",
+    "email": "ana.martinez@example.com",
+    "birthDate": "1988-11-05"
+  }]
+}

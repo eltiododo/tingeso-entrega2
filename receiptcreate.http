@@ -1,0 +1,3 @@
+### Create Receipt 1 - 10% dcto (4 personas)
+POST http://localhost:8080/api/mono/receipt/create/1
+###

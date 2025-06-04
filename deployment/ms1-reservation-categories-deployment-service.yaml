@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms1-reservation-categories
+  labels:
+    app: ms1-reservation-categories
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms1-reservation-categories
+  template:
+    metadata:
+      labels:
+        app: ms1-reservation-categories
+    spec:
+      containers:
+      - name: ms1-reservation-categories
+        image: tingeso2clusterregistry.azurecr.io/ms1-reservation-categories:latest
+        ports:
+        - containerPort: 8091
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: CONFIG_SERVER_HOST
+          value: "config-server-service"
+        - name: EUREKA_SERVER_HOST
+          value: "eureka-server-service"
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config-map
+              key: DB_HOST
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config-map
+              key: DB_NAME_MS1
+        - name: DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config-map
+              key: DB_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: project-secrets
+              key: DB_PASS

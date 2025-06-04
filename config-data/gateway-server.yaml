@@ -1,13 +1,11 @@
 server:
   port: 8080
 eureka:
-  instance:
-    hostname: localhost
   client:
     fetch-registry: true
     register-with-eureka: true
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${EUREKA_SERVER_HOST}:8761/eureka/
 spring:
   cloud:
     gateway:
@@ -21,15 +19,15 @@ spring:
             allowedMethods: "*"
             allowedHeaders: "*"
       routes:
-        - id: kartingrm
-          uri: lb://kartingrm:8090
+        - id: ms5-reservations
+          uri: lb://ms5-reservations
           predicates:
             - Path=/api/mono/**
         - id: ms1-reservation-categories
-          uri: lb://ms1-reservation-categories:8091
+          uri: lb://ms1-reservation-categories
           predicates:
             - Path=/api/reservation-category/**
         - id: ms2-quantity-discounts
-          uri: lb://ms2-quantity-discounts:8092
+          uri: lb://ms2-quantity-discounts
           predicates:
             - Path=/api/quantity-discount/**
