@@ -1,5 +1,3 @@
 FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=build /app/target/*.jar config-server.jar
-EXPOSE 8090
+COPY ./target/*.jar config-server.jar
 ENTRYPOINT ["java", "-jar", "./config-server.jar"]

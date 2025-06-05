@@ -20,6 +20,12 @@ spec:
         ports:
         - containerPort: 8080
         env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "prod"
+        - name: SPRING_CLOUD_CONFIG_URI
+          value: http://config-server-service:8888
+        - name: SPRING_CONFIG_IMPORT
+          value: "optional:configserver:http://config-server-service:8888"
         - name: CONFIG_SERVER_HOST
           value: "config-server-service"
         - name: EUREKA_SERVER_HOST
@@ -38,4 +44,4 @@ spec:
     - protocol: TCP
       port: 8080
       targetPort: 8080
-  type: ClusterIP
+  type: LoadBalancer
