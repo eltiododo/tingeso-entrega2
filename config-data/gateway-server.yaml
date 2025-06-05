@@ -31,3 +31,11 @@ spring:
           uri: lb://ms2-quantity-discounts
           predicates:
             - Path=/api/quantity-discount/**
+        - id: ms3-frequency-discounts
+          uri: lb://ms3-frequency-discounts
+          predicates:
+            - Path=/api/frequency-discount/**
+        - id: ms4-special-tariffs
+          uri: lb://ms4-special-tariffs
+          predicates:
+            - Path=/api/special-tariff/**

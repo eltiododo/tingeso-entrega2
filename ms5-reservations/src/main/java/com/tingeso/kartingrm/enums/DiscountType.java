@@ -9,11 +9,6 @@ public enum DiscountType {
     // Descuento por cumpleaños
     BIRTHDAY(50),
 
-    // Descuentos por numero de personas
-    PEOPLE_3TO5(10),
-    PEOPLE_6TO10(20),
-    PEOPLE_11TO15(30),
-
     // Descuentos para clientes frecuentes
     FREQUENCY_VERYHIGH(30), // 7+ visitas mensuales
     FREQUENCY_HIGH(20),     // 5-6
@@ -25,13 +20,6 @@ public enum DiscountType {
     private int percentage;
     DiscountType(int percentage) {
         this.percentage = percentage;
-    }
-
-    public static DiscountType getDiscount(int clientAmount) {
-        if (3 <= clientAmount && clientAmount <= 5) return DiscountType.PEOPLE_3TO5;
-        if (6 <= clientAmount && clientAmount <= 10) return DiscountType.PEOPLE_6TO10;
-        if (11 <= clientAmount && clientAmount <= 15) return DiscountType.PEOPLE_11TO15;
-        return DiscountType.NONE;
     }
 
     public static DiscountType getFrequencyDiscount(int visits) {

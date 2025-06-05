@@ -1,6 +1,6 @@
 package com.tingeso.ms1_reservation_categories.controllers;
 
-import com.tingeso.ms1_reservation_categories.dtos.ReservationCategoryDTO;
+import com.tingeso.ms1_reservation_categories.entities.ReservationCategory;
 import com.tingeso.ms1_reservation_categories.services.ReservationCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ public class ReservationCategoryController {
     }
 
     @GetMapping("/get")
-    public ResponseEntity<Map<String, ReservationCategoryDTO>> getAll() {
+    public ResponseEntity<Map<String, ReservationCategory>> getAll() {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(reservationCategoryService.getAll());
@@ -29,7 +29,7 @@ public class ReservationCategoryController {
     @GetMapping("/get/{tier}")
     public ResponseEntity<?> getByTierName(@PathVariable String tier) {
         try {
-            ReservationCategoryDTO reservationCategory = reservationCategoryService.getByTierName(tier);
+            ReservationCategory reservationCategory = reservationCategoryService.getByTierName(tier);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(reservationCategory);
 

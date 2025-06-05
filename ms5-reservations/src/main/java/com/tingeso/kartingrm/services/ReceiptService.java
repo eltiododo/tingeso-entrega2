@@ -5,10 +5,7 @@ import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.tingeso.kartingrm.dtos.ClientDTO;
-import com.tingeso.kartingrm.dtos.ClientReceiptRow;
-import com.tingeso.kartingrm.dtos.QuantityDiscount;
-import com.tingeso.kartingrm.dtos.ReservationCategory;
+import com.tingeso.kartingrm.dtos.*;
 import com.tingeso.kartingrm.entities.ClientEntity;
 import com.tingeso.kartingrm.entities.ReceiptEntity;
 import com.tingeso.kartingrm.entities.ReservationEntity;
@@ -49,13 +46,6 @@ public class ReceiptService {
     private ClientRepository clientRepository;
     @Autowired
     private RestTemplate restTemplate;
-
-    // holidays: año nuevo, dia del trabajador, fiestas patrias, navidad
-    List<Integer> holidays = Stream.of("01-01", "05-01", "09-18", "09-19", "12-25")
-            .map(s -> s.concat(String.valueOf(LocalDate.now().getYear())))
-            .map(s -> LocalDate.parse(s, DateTimeFormatter.ofPattern("MM-ddyyyy")))
-            .map(LocalDate::getDayOfYear)
-            .toList();
 
     // Crear comprobante para una reserva
     public ReceiptEntity createReceipt(Long idReservation) {
@@ -120,7 +110,7 @@ public class ReceiptService {
                                                      Integer clientMonthlyVisits, ReservationEntity reservation, ReservationCategory category) {
         ClientReceiptRow crow = new ClientReceiptRow();
         crow.setClientName(client.getFirstName() + " " + client.getLastName());
-        crow.setBaseTariff(category.getCost());
+        crow.setBaseTariff(convertTariff(reservation, category.getCost()));
 
         // get quantity discount
         QuantityDiscount quantityDiscount = restTemplate.getForObject(
@@ -128,10 +118,21 @@ public class ReceiptService {
                         + clientAmount, QuantityDiscount.class);
         crow.setGroupDiscount(quantityDiscount);
 
+        // get birthday and frequency discounts
+        GenericDiscountType birthdayDiscount = restTemplate.getForObject(
+                "http://ms4-special-tariffs/api/special-tariff/BIRTHDAY", GenericDiscountType.class);
+
+        GenericDiscountType frequencyDiscount = restTemplate.getForObject(
+                "http://ms3-frequency-discounts/api/frequency-discount/"
+                        + clientMonthlyVisits, GenericDiscountType.class);
+
+        // set special tariff, only 1, birthday is priority
         if (client.getBirthday() != null && reservation.getBookingDate().getDayOfYear() == client.getBirthday())
-            crow.setIndividualDiscount(DiscountType.BIRTHDAY);
+            crow.setIndividualDiscount(birthdayDiscount);
         else
-            crow.setIndividualDiscount(DiscountType.getFrequencyDiscount(clientMonthlyVisits));
+            crow.setIndividualDiscount(frequencyDiscount);
+
+        // final cost!
         crow.setFinalCost((int) (crow.getBaseTariff()
                         * (1 - (double) (crow.getGroupDiscount().getPercentage()) / 100)
                         * (1 - (double) (crow.getIndividualDiscount().getPercentage()) / 100)));
@@ -229,16 +230,17 @@ public class ReceiptService {
                 table.addCell(new Phrase(row.getGroupDiscount().getPercentage() + "%", cellFont));
                 table.addCell(new Phrase(row.getIndividualDiscount().getPercentage() + "%", cellFont));
 
-                DiscountType discountType = row.getIndividualDiscount();
+                String discountType = row.getIndividualDiscount().getTextId();
                 String discount;
-                if (discountType.equals(DiscountType.BIRTHDAY))
+
+                if (discountType.equals("BIRTHDAY"))
                     discount = "Cumpleaños";
-                else if (discountType.equals(DiscountType.NONE))
+                else if (discountType.equals("NONE"))
                     discount = "-";
                 else
                     discount = "Frecuencia";
-                table.addCell(new Phrase(discount, cellFont));
 
+                table.addCell(new Phrase(discount, cellFont));
                 table.addCell(new Phrase("$" + row.getFinalCost(), cellFont));
             }
 
@@ -262,21 +264,23 @@ public class ReceiptService {
         }
     }
 
-    int getTariff(int clientAmount, ReservationEntity reservation, ReservationCategory category) {
-        DiscountType discount = DiscountType.getDiscount(clientAmount);
+    int convertTariff(ReservationEntity reservation, int tariff) {
 
         // Tarifa especial por dias
-        int tariff = category.getCost();
         LocalDate reservationDay = reservation.getBookingDate().toLocalDate();
 
-        // si es fin de semana, o dia feriado...
-        if (reservationDay.getDayOfWeek().compareTo(DayOfWeek.SATURDAY) >= 0 ||
-            holidays.contains(reservationDay.getDayOfYear())) {
-            tariff = tariff * (1 + DiscountType.SPECIAL_TARIFF.getPercentage() / 100);
+        GenericDiscountType specialTariff = restTemplate.getForObject(
+                "http://ms4-special-tariffs/api/special-tariff/festive/"
+                        + reservationDay.getDayOfYear(), GenericDiscountType.class);
+
+        // por si acaso...
+        if (specialTariff == null) {
+            return tariff;
         }
 
-        tariff = tariff * (1 - discount.getPercentage() / 100);
-        return tariff;
+        int newTariff = (int) (tariff * (1 + (double) specialTariff.getPercentage() / 100));
+        System.out.println("Returning " + tariff + " * (1 + " + specialTariff.getPercentage() + " / 100) = " + newTariff);
+        return newTariff;
     }
 
     public void sendReceiptEmail(String toEmail, String subject, String body, byte[] attachment, String attachmentName) {

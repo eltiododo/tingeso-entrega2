@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms4-special-tariffs
+  labels:
+    app: ms4-special-tariffs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ms4-special-tariffs
+  template:
+    metadata:
+      labels:
+        app: ms4-special-tariffs
+    spec:
+      containers:
+        - name: ms4-special-tariffs
+          image: tingeso2clusterregistry.azurecr.io/ms4-special-tariffs:latest
+          ports:
+            - containerPort: 8094
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: CONFIG_SERVER_HOST
+              value: "config-server-service"
+            - name: EUREKA_SERVER_HOST
+              value: "eureka-server-service"
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_HOST
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_NAME_MS4
+            - name: DB_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: DB_USER
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: project-secrets
+                  key: DB_PASS

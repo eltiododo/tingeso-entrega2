@@ -9,4 +9,6 @@ data:
   DB_USER: "postgres"
   DB_NAME_MS1: "kartingrm_ms1_db"
   DB_NAME_MS2: "kartingrm_ms2_db"
+  DB_NAME_MS3: "kartingrm_ms3_db"
+  DB_NAME_MS4: "kartingrm_ms4_db"
   DB_NAME_MS5: "kartingrm_db"
