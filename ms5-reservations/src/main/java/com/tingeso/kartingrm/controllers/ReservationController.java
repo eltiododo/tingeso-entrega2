@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mono/reservation")
+@RequestMapping("/api/reservations-receipts/reservation")
 @CrossOrigin("*")
 public class ReservationController {
     @Autowired

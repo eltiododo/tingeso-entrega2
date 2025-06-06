@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/mono/receipt")
+@RequestMapping("/api/reservations-receipts/receipt")
 @CrossOrigin("*")
 public class ReceiptController {
     @Autowired

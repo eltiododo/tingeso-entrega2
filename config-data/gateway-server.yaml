@@ -22,7 +22,7 @@ spring:
         - id: ms5-reservations
           uri: lb://ms5-reservations
           predicates:
-            - Path=/api/mono/**
+            - Path=/api/reservations-receipts/**
         - id: ms1-reservation-categories
           uri: lb://ms1-reservation-categories
           predicates:
@@ -39,3 +39,11 @@ spring:
           uri: lb://ms4-special-tariffs
           predicates:
             - Path=/api/special-tariff/**
+        - id: ms6-rack
+          uri: lb://ms6-rack
+          predicates:
+            - Path=/api/rack/**
+        - id: ms7-reports
+          uri: lb://ms7-reports
+          predicates:
+            - Path=/api/reports/**
