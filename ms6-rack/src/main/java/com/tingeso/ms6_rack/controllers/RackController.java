@@ -16,7 +16,7 @@ public class RackController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> getReservations() {
-        return ResponseEntity.ok(rackService.getReservations());
+    public ResponseEntity<?> getRackEvents() {
+        return ResponseEntity.ok(rackService.getRackEvents());
     }
 }

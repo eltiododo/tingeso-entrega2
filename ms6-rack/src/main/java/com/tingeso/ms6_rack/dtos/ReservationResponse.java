@@ -7,9 +7,8 @@ import java.util.List;
 
 @Data
 public class ReservationResponse {
-    Long id;
-    LocalDateTime bookingDate;
-    String category;
-    List<Long> idClients;
-    Long reserveeClientId;
+    private Long id;
+    private LocalDateTime bookingDate;
+    private String category;
+    private List<ClientEntity> clients;
 }
