@@ -1,15 +1,17 @@
 package com.tingeso.ms7_reports.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Data
-@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReservationCategory {
-    private int laps;
-    private int minutesMax;
-    private int cost;
-    private int minutesTotal;
+    private Integer laps;
+    private Integer minutesMax;
+    private Integer cost;
+    private Integer minutesTotal;
 
     @Override
     public String toString() {

@@ -13,5 +13,6 @@ import java.util.Map;
 public class ReportResponse {
     YearMonth start;
     YearMonth end;
+    boolean usesCategory;
     Map<String, Map<YearMonth, Integer>> earningsByMonth;
 }

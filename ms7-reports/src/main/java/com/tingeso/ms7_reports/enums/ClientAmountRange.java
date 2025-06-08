@@ -3,6 +3,8 @@ package com.tingeso.ms7_reports.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.*;
+
 @Getter
 @AllArgsConstructor
 public enum ClientAmountRange {
@@ -27,5 +29,13 @@ public enum ClientAmountRange {
     public String toString() {
         if (this.equals(OUT_OF_BOUNDS)) return "Rango invalido";
         return String.format("%d-%d personas", lower, upper);
+    }
+
+    public static Map<String, ClientAmountRange> clientAmountRangeMap() {
+        Map<String, ClientAmountRange> clientAmountRanges = new LinkedHashMap<>();
+        Arrays.stream(ClientAmountRange.values())
+                .filter(range -> !range.equals(OUT_OF_BOUNDS))
+                .forEach(range -> clientAmountRanges.put(range.toString(), range));
+        return clientAmountRanges;
     }
 }

@@ -4,6 +4,7 @@ import com.tingeso.ms7_reports.dtos.ReportResponse;
 import com.tingeso.ms7_reports.dtos.ReservationCategory;
 import com.tingeso.ms7_reports.dtos.ReservationSummary;
 import com.tingeso.ms7_reports.enums.ClientAmountRange;
+import lombok.Getter;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.time.YearMonth;
 import java.util.*;
 
 @Service
+@Getter
 public class ReportService {
     private final RestTemplate restTemplate;
 
@@ -43,10 +45,6 @@ public class ReportService {
                 ).getBody();
     }
 
-    public List<ClientAmountRange> getRanges() {
-        return Arrays.stream(ClientAmountRange.values()).toList();
-    }
-
     private List<YearMonth> getAllMonthsInRange(YearMonth start, YearMonth end) {
         List<YearMonth> months = new ArrayList<>();
         for (YearMonth month = start;
@@ -61,10 +59,12 @@ public class ReportService {
         List<ReservationSummary> reservations = getSummary(start, end);
 
         List<YearMonth> allMonths = getAllMonthsInRange(start, end);
-        Map<String, ReservationCategory> allCategories = getCategories();
+        Map<String, ?> allCategories =
+                usingCategory ? getCategories() :
+                ClientAmountRange.clientAmountRangeMap();
 
         // zeroes[:] de matlab version meses lmao
-        Map<String, Map<YearMonth, Integer>> reportData = new TreeMap<>();
+        Map<String, Map<YearMonth, Integer>> reportData = new LinkedHashMap<>();
         allCategories.keySet().forEach(category -> {
             Map<YearMonth, Integer> monthData = new HashMap<>();
             // "columna x cada mes independientemente si tienen montos o no."
@@ -75,7 +75,8 @@ public class ReportService {
         // llenar con valores
         reservations.forEach(res -> {
             YearMonth month = YearMonth.from(res.getBookingDate());
-            String category = res.getCategory();
+            String category = usingCategory ? res.getCategory() :
+                    ClientAmountRange.getClientAmountRange(res.getClientAmount()).toString();
             Integer amount = res.getCostTotal();
 
             // obtener total mensual
@@ -83,10 +84,6 @@ public class ReportService {
         });
 
         // flat map goes here
-        return new ReportResponse(
-                start, end, reportData
-        );
+        return new ReportResponse(start, end, usingCategory, reportData);
     }
-
-
 }
