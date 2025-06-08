@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReceiptRepository extends JpaRepository<ReceiptEntity, Long> {
     ReceiptEntity findByIdReservation(Long idReservation);
+    boolean existsByIdReservation(Long idReservation);
 }

@@ -24,8 +24,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.springframework.mail.SimpleMailMessage;
@@ -46,6 +49,14 @@ public class ReceiptService {
     private ClientRepository clientRepository;
     @Autowired
     private RestTemplate restTemplate;
+
+    public List<ReceiptEntity> getAllReceipts() {
+        return receiptRepository.findAll();
+    }
+
+    public ReceiptEntity getReceiptByReservationId(Long id) {
+        return receiptRepository.findByIdReservation(id);
+    }
 
     // Crear comprobante para una reserva
     public ReceiptEntity createReceipt(Long idReservation) {
@@ -137,6 +148,30 @@ public class ReceiptService {
                         * (1 - (double) (crow.getGroupDiscount().getPercentage()) / 100)
                         * (1 - (double) (crow.getIndividualDiscount().getPercentage()) / 100)));
         return crow;
+    }
+
+    public List<ReservationSummaryDTO> getSummaryInYearMonthRange(YearMonth from, YearMonth to) {
+        // Convert YearMonth to LocalDate using start/end of month
+        LocalDateTime fromDateTime = from.atDay(1).atStartOfDay();  // First day of start month
+        LocalDateTime toDateTime = to.atEndOfMonth().atStartOfDay();  // Last day of end month
+
+        return reservationRepository.findByBookingDateBetween(fromDateTime, toDateTime)
+                .stream()
+                .filter(r -> receiptRepository.existsByIdReservation(r.getId()))
+                .map(r -> {
+                    ReceiptEntity receipt = receiptRepository.findByIdReservation(r.getId());
+                    ClientEntity client = clientRepository.findById(r.getIdClients().get(0)).orElse(null);
+                    String clientName = client != null ? client.getFirstName() + " " + client.getLastName() : "";
+                    return new ReservationSummaryDTO(
+                            r.getId(),
+                            r.getBookingDate(),
+                            r.getCategory(),
+                            clientName,
+                            receipt.getClientAmount(),
+                            receipt.getCostTotal());
+                    }
+                )
+                .toList();
     }
 
     public byte[] generateReceiptPdf(Long idReservation) throws IOException, DocumentException {

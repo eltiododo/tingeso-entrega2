@@ -1,17 +1,19 @@
 package com.tingeso.kartingrm.dtos;
 
-import com.tingeso.kartingrm.entities.ClientEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
-public class ReservationDTO {
+public class ReservationSummaryDTO {
     Long id;
     LocalDateTime bookingDate;
     String category;
-    List<ClientEntity> clients;
+    String reserveeClientName;
+    Integer clientAmount;
+    Integer costTotal;
 }

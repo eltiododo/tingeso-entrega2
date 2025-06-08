@@ -2,6 +2,7 @@ package com.tingeso.kartingrm.services;
 
 import com.tingeso.kartingrm.dtos.CreateReservationClientDTO;
 import com.tingeso.kartingrm.dtos.ReservationDTO;
+import com.tingeso.kartingrm.dtos.ReservationSummaryDTO;
 import com.tingeso.kartingrm.entities.ClientEntity;
 import com.tingeso.kartingrm.entities.ReservationEntity;
 import com.tingeso.kartingrm.dtos.ReservationCategory;
@@ -14,10 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
@@ -125,10 +123,6 @@ public class ReservationService {
         return toDto(reservationRepository.findById(id).orElse(null));
     }
 
-//    public List<ReservationEntity> getReservationsByCategory(ReservationCategory reservationCategory) {
-//        return reservationRepository.findByCategory(reservationCategory);
-//    }
-
     public void deleteReservation(Long id) {
         ReservationEntity reservation = reservationRepository.findById(id).orElse(null);
         assert reservation != null;
@@ -141,11 +135,10 @@ public class ReservationService {
     
     public ReservationDTO toDto(ReservationEntity r) {
         if (r == null) return null;
-        ReservationDTO rdto = new ReservationDTO();
-        rdto.setId(r.getId());
-        rdto.setCategory(r.getCategory());
-        rdto.setBookingDate(r.getBookingDate());
-        rdto.setClients(r.getIdClients().stream().map(cId -> clientRepository.findById(cId).orElse(null)).toList());
-        return rdto;
+        return new ReservationDTO(
+                r.getId(),
+                r.getBookingDate(),
+                r.getCategory(),
+                r.getIdClients().stream().map(cId -> clientRepository.findById(cId).orElse(null)).toList());
     }
 }

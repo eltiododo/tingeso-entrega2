@@ -1,11 +1,10 @@
 package com.tingeso.kartingrm.controllers;
 
-import com.tingeso.kartingrm.entities.ClientEntity;
+import com.tingeso.kartingrm.dtos.ReservationSummaryDTO;
 import com.tingeso.kartingrm.entities.ReceiptEntity;
-import com.tingeso.kartingrm.entities.ReservationEntity;
-import com.tingeso.kartingrm.services.ClientService;
 import com.tingeso.kartingrm.services.ReceiptService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -13,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.time.YearMonth;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/reservations-receipts/receipt")
@@ -22,6 +21,29 @@ import java.util.stream.Collectors;
 public class ReceiptController {
     @Autowired
     ReceiptService receiptService;
+
+    @GetMapping("/get")
+    public ResponseEntity<?> getAllReceipts() {
+        return ResponseEntity.ok(receiptService.getAllReceipts());
+    }
+
+    @GetMapping("/get/{idReservation}")
+    public ResponseEntity<?> getReceiptById(@PathVariable Long idReservation) {
+        ReceiptEntity receipt = receiptService.getReceiptByReservationId(idReservation);
+
+        if (receipt == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return ResponseEntity.ok(receiptService.getReceiptByReservationId(idReservation));
+    }
+
+    @GetMapping("/get-between/")
+    public ResponseEntity<List<ReservationSummaryDTO>> getReservationsBetween(
+            @RequestParam @DateTimeFormat(pattern = "MM-yyyy") YearMonth start,
+            @RequestParam @DateTimeFormat(pattern = "MM-yyyy") YearMonth end) {
+        return ResponseEntity.ok(receiptService.getSummaryInYearMonthRange(start, end));
+    }
 
     @PostMapping("/create/{idReservation}")
     public ResponseEntity<?> createReceipt(@PathVariable Long idReservation) {
