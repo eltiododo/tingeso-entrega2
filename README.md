@@ -9,6 +9,4 @@ Implementados
 - **ms4-special-tariffs:** Tarifas para días especiales
 - **ms5-reservations:** Registro de reservas; comprobantes de pago para clientes
 - **ms6-rack:** Rack semanal de ocupación de la pista
-
-Por implementar
 - **ms7-reports:** Reporte de ingresos por número de vueltas o tiempo máximo (por categoría); ~por número de personas
