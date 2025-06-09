@@ -15,6 +15,10 @@ import HailIcon from "@mui/icons-material/Hail";
 import MedicationLiquidIcon from "@mui/icons-material/MedicationLiquid";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import HomeIcon from "@mui/icons-material/Home";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
+import { LocalAtm } from "@mui/icons-material";
+import { DiscountOutlined, Discount } from "@mui/icons-material";
+import { Cake } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { DirectionsCarFilled, ViewDay } from "@mui/icons-material";
 
@@ -43,6 +47,34 @@ export default function Sidemenu({ open, toggleDrawer }) {
           <ListItemText primary="Lista de Karts" />
         </ListItemButton>
 
+        <ListItemButton onClick={() => navigate("/reservation-categories")}>
+          <ListItemIcon>
+            <LocalAtm />
+          </ListItemIcon>
+          <ListItemText primary="Categorías de Reserva" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => navigate("/quantity-discounts")}>
+          <ListItemIcon>
+            <Discount />
+          </ListItemIcon>
+          <ListItemText primary="Descuentos por Cantidad" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => navigate("/frequency-discounts")}>
+          <ListItemIcon>
+            <DiscountOutlined />
+          </ListItemIcon>
+          <ListItemText primary="Descuentos por Cliente Frecuente" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => navigate("/special-tariffs")}>
+          <ListItemIcon>
+            <Cake />
+          </ListItemIcon>
+          <ListItemText primary="Tarifas Dias Especiales" />
+        </ListItemButton>
+
         <ListItemButton onClick={() => navigate("/reservation/list")}>
           <ListItemIcon>
             <ViewDay />
@@ -50,7 +82,14 @@ export default function Sidemenu({ open, toggleDrawer }) {
           <ListItemText primary="Lista de Reservas" />
         </ListItemButton>
 
-        <ListItemButton onClick={() => navigate("/report")}>
+        <ListItemButton onClick={() => navigate("/rack")}>
+          <ListItemIcon>
+            <CalendarMonth />
+          </ListItemIcon>
+          <ListItemText primary="Rack Semanal" />
+        </ListItemButton>
+
+        <ListItemButton onClick={() => navigate("/reports")}>
           <ListItemIcon>
             <CalculateIcon />
           </ListItemIcon>

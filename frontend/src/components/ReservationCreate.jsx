@@ -8,6 +8,7 @@ import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import { categoryDescription } from "./ReservationList.jsx";
 import { Box, Typography } from "@mui/material";
+import { useEffect } from "react";
 
 const ReservationCreate = () => {
   const [bookingDate, setBookingDate] = useState("");
@@ -16,6 +17,17 @@ const ReservationCreate = () => {
   const [clients, setClients] = useState([{ name: "", email: "" }]);
   const [warning, setWarning] = useState("");
   const navigate = useNavigate();
+
+  // Parse URL query parameters when component mounts
+  useEffect(() => {
+    // Get the bookingDate from the URL query parameter
+    const params = new URLSearchParams(location.search);
+    const dateParam = params.get('bookingDate');
+    
+    if (dateParam) {
+      setBookingDate(dateParam);
+    }
+  }, [location]);
 
   // Handle form submission
   const handleSubmit = (e) => {

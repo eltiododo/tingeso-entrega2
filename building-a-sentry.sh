@@ -21,6 +21,7 @@ SERVICES=(
   "ms5-reservations"
   "ms6-rack"
   "ms7-reports"
+  "frontend"
   # Add other microservices here
 )
 
