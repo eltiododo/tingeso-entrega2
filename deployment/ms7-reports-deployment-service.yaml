@@ -17,6 +17,7 @@ spec:
       containers:
         - name: ms7-reports
           image: tingeso2clusterregistry.azurecr.io/ms7-reports:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8097
           env:

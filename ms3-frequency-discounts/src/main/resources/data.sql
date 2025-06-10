@@ -1,6 +1,6 @@
 INSERT INTO
     frequency_discount (text_id, percentage)
 VALUES
-    ('FREQUENCY_VERYHIGH',30), -- 7+ visitas mensuales
-    ('FREQUENCY_HIGH', 20),     -- 5-6
-    ('FREQUENCY_REGULAR', 10);  -- 2-4
+    ('FREQUENCY_7TO28', 30), -- 7+ visitas mensuales
+    ('FREQUENCY_5TO6',  20),     -- 5-6
+    ('FREQUENCY_2TO4',  10);  -- 2-4

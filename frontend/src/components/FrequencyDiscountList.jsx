@@ -53,7 +53,9 @@ const FrequencyDiscountList = () => {
   }, []);
 
   const formatFrequencyRange = (textId) => {
-    return textId.replace(/FREQUENCY_/g, '').toLowerCase();
+    const numberIndex = textId.search(/\d+/g);
+    const range = textId.substring(numberIndex);
+    return range.replace('TO', ' - ') + ' visitas mensuales';
   };
 
   return (

@@ -18,9 +18,9 @@ public class FrequencyDiscountService {
     }
 
     public FrequencyDiscount getDiscount(int visits) {
-        if (visits >= 7) return frequencyDiscountRepository.findByTextId("FREQUENCY_VERYHIGH");
-        if (5 <= visits) return frequencyDiscountRepository.findByTextId("FREQUENCY_HIGH");
-        if (2 <= visits) return frequencyDiscountRepository.findByTextId("FREQUENCY_REGULAR");
+        if (visits >= 7) return frequencyDiscountRepository.findByTextId("FREQUENCY_7TO28");
+        if (5 <= visits) return frequencyDiscountRepository.findByTextId("FREQUENCY_5TO6");
+        if (2 <= visits) return frequencyDiscountRepository.findByTextId("FREQUENCY_2TO4");
         return new FrequencyDiscount(0L, "NONE", 0);
     }
 }
