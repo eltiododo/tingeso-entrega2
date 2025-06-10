@@ -19,6 +19,9 @@ spec:
         image: tingeso2clusterregistry.azurecr.io/frontend:latest
         ports:
         - containerPort: 5173
+        env:
+        - name: VITE_APP_API_URL
+          value: "http://gateway-server-service:8080"
 
 ---
 apiVersion: v1
